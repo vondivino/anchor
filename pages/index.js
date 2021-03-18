@@ -3,7 +3,7 @@ import Head from 'next/head'
 export default function Home({ user }) {
 
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>Buoy Tech</title>
       </Head>
