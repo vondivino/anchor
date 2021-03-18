@@ -1,15 +1,20 @@
 import { 
   Typography,
   Divider,
-  Grid
+  Grid,
+  Button
 } from '@material-ui/core'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import firebase from '../../../lib/firebase'
 import Layout from '../../../components/Layout'
+import { makeStyles } from '@material-ui/core/styles'
 import Workspace from '../../../components/Workspace'
 
 export default function WorkspacesHome({ user }) {
 
+  const styles = useStyles()
+  const router = useRouter()
   const [workspaces, setWorkspaces] = useState([])
   const firestore = firebase.firestore()
   const workspacesRef = firestore.collection('workspaces')
@@ -39,17 +44,32 @@ export default function WorkspacesHome({ user }) {
     return () => setWorkspaces([])
   }, [])
 
+  // TODO: Refactor UI
   return (
     <Layout>
-      <Typography 
-        variant="h4" 
-        component="h1" 
-        gutterBottom
-      >
-        All Workspaces
-      </Typography>
-      <Divider />
       <Grid container>
+        <Grid item xs={1} md={6}>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            gutterBottom
+          >
+            All Workspaces
+          </Typography>
+        </Grid>
+        <Grid item xs={1} md={6}>
+          <Button 
+            className={styles.workspaceAddBtn}
+            variant="contained" 
+            color="primary"
+            onClick={() => {
+              router.push('/anchor/workspaces/new/')
+            }}
+          >
+            New Workspace
+          </Button>
+        </Grid>
+      <Divider />
         <Grid item xs={1} md={12}>
           <Grid container>
             {workspaces.map(workspace => (
@@ -64,6 +84,14 @@ export default function WorkspacesHome({ user }) {
     </Layout>
   )
 }
+
+const useStyles = makeStyles(theme => {
+  return {
+    workspaceAddBtn: {
+      float: 'right'
+    }
+  } 
+})
 
 /**
  *
