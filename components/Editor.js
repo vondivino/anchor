@@ -1,3 +1,4 @@
+// TODO
 import 'file-loader'
 import Preview from './Preview'
 import AceEditor from 'react-ace'
@@ -6,17 +7,16 @@ import "ace-builds/webpack-resolver"
 import firebase from '../lib/firebase'
 import { useState, useEffect } from 'react'
 import 'ace-builds/src-noconflict/mode-html'
-import 'ace-builds/src-noconflict/ext-language_tools'
 import 'ace-builds/src-noconflict/theme-monokai'
+import 'ace-builds/src-noconflict/ext-language_tools'
 
 export default function Editor({ id, collection }) {
 
   const [code, setCode] = useState('')
   const [enrolled, setEnrolled] = useState({})
   const firestore = firebase.firestore()
-  const workspacesRef = firestore.collection(collection)
-  const workspaceRef = workspacesRef.doc(id)
-
+  const collectionRef = firestore.collection(collection)
+  const docRef = collectionRef.doc(id)
 
   /** 
    * 
@@ -31,11 +31,11 @@ export default function Editor({ id, collection }) {
    */
   function handleLiveSave(code_) {
     if (collection !== 'enrolled') {
-      workspaceRef.update({ code: code_ })
+      docRef.update({ code: code_ })
     } else {
       const course = {...enrolled, code: code_ }
       const updatedEnrolled = { course: course }
-      workspaceRef.update(updatedEnrolled)
+      docRef.update(updatedEnrolled)
     }
     setCode(code_)
   }
@@ -46,14 +46,13 @@ export default function Editor({ id, collection }) {
    * will be the initial code value in the code editor.
    * 
    */
-
   useEffect(async () => {
-    const workspace = await workspaceRef.get()
+    const doc = await docRef.get()
     if (collection !== 'enrolled') {
-      setCode(workspace.data().code)
+      setCode(doc.data().code)
     } else {
-      setEnrolled(workspace.data().course)
-      setCode(workspace.data().course.code)
+      setEnrolled(doc.data().course)
+      setCode(doc.data().course.code)
     }
     return () => setCode(null)
   }, [])

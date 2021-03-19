@@ -7,15 +7,25 @@ import {
   CardActions
 } from '@material-ui/core'
 import firebase from '../lib/firebase'
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { useState, useEffect } from 'react'
 
 export default function Course({ course, user }) {
 
   const router = useRouter()
+  const { name, description, slug } = course
   const [isEnrolled, setIsEnrolled] = useState(false)
 
   useEffect(async () => {
+    /**
+     * 
+     * Check if the user is already enrolled
+     * in a course. If so, we do not want to 
+     * re-enroll the user again. Instead, 
+     * we will just continue his/her course 
+     * session.
+     * 
+     */
     const courses = await firebase
     .firestore()
     .collection('enrolled')
@@ -36,6 +46,15 @@ export default function Course({ course, user }) {
       course: course
     }
 
+    /** 
+     * 
+     * Enroll only the user if the user is
+     * not currently enrolled in a course.
+     * 
+     * Immediately push the user to the first
+     * page of the course.
+     * 
+     */
     if (!isEnrolled) {
       firebase
       .firestore()
@@ -43,6 +62,8 @@ export default function Course({ course, user }) {
       .doc()
       .set(details)
     }
+
+    router.push(`/anchor/courses/${slug}/0`)
   }
 
   return (
@@ -50,18 +71,19 @@ export default function Course({ course, user }) {
       <Card>
         <CardContent>
           <Typography>
-            { course.name }
+            { name }
           </Typography>
           <Typography>
-            { course.description }
+            { description }
           </Typography>
         </CardContent>
         <CardActions>
           <Button onClick={() => {
             handleEnroll()
-            router.push(`/anchor/courses/${course.slug}/0`)
           }}>
-            { (isEnrolled) ? 'Continue': 'Start'}
+            { (isEnrolled) 
+            ? 'Continue'
+            : 'Start'}
           </Button>
         </CardActions>
       </Card>

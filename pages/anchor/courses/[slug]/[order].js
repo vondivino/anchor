@@ -1,7 +1,7 @@
 import { 
   Grid, 
-  Typography,
   Divider,
+  Typography,
   Button
 } from '@material-ui/core'
 import dynamic from 'next/dynamic'
@@ -30,6 +30,15 @@ export default function CoursePage({ user, slug, order }) {
   const [course, setCourse] = useState({})
   const [currentStep, setCurrentStep ] = useState({}) 
 
+
+  /** 
+   * 
+   * This code architecture below will fetch the 
+   * selected course. Remember that each course
+   * is user-sessioned. Meaning, all of the course
+   * instance are unique to each users.
+   * 
+   */
   useEffect(async () => {
     let course_ = {}
     let steps_ = []
@@ -51,6 +60,14 @@ export default function CoursePage({ user, slug, order }) {
       course_.steps = steps_
       setCourse(course_)
 
+      /**
+       * 
+       * Here, if the course's step doesn't exists, 
+       * it will redirect to the courses page.
+       * 
+       * This is the solution for now.
+       * 
+       */
       const currentStep_ = steps_.filter(step => step.order == order)
       if (currentStep_.length !== 0) {
         setCurrentStep(currentStep_[0])
@@ -74,15 +91,27 @@ export default function CoursePage({ user, slug, order }) {
     <Layout>
       <Grid container>
         <Grid item xs={12} md={6}>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            gutterBottom
+          >
             { currentStep.name }
           </Typography>
-          <Typography variant="subtitle1" component="p" gutterBottom>
+          <Typography 
+            variant="subtitle1" 
+            component="p" 
+            gutterBottom
+          >
             { currentStep.description }
           </Typography>
           <Divider />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid 
+          item 
+          xs={12} 
+          md={6}
+        >
           <Button 
             variant="contained" 
             color="primary"
@@ -101,10 +130,11 @@ export default function CoursePage({ user, slug, order }) {
           </Button>
         </Grid>
       </Grid>
-      {/* EDITOR */}
       { course.id && 
-      <Editor id={course.id} collection="enrolled" />}
-      {/* EDITOR */}
+      <Editor 
+        id={course.id} 
+        collection="enrolled" 
+      />}
     </Layout>
   )
 }
@@ -119,6 +149,15 @@ const useStyles = makeStyles(theme => {
   }
 })
 
+/**
+ *
+ * The code below is a server-side render.
+ * For authentication purpose only.
+ *
+ * If a user is authenticated, then continue
+ * to fetch the all selected course.
+ *
+ */
 export async function getServerSideProps({ req, params }) {
   if (req.cookies.token) {
     return { props: {

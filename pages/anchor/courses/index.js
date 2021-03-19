@@ -13,6 +13,13 @@ export default function CoursesHome({ user }) {
 
   const [courses, setCourses] = useState([])
 
+  /** 
+   * 
+   * This code architecture below will fetch the course
+   * and its steps. It will structure it so that it will 
+   * be synchronous to other codebase.
+   * 
+   */
   useEffect(async () => {
     let courses_ = []
     let course_ = {}
@@ -34,9 +41,9 @@ export default function CoursesHome({ user }) {
 
       course_.id = course.id
       course_.slug = course.data().slug
+      course_.name = course.data().name
       course_.code = course.data().code
       course_.description = course.data().description
-      course_.name = course.data().name
       course_.steps = steps_
       courses_ = [...courses_, course_]
       setCourses(courses_)
@@ -48,12 +55,20 @@ export default function CoursesHome({ user }) {
     <Layout>
       <Grid container>
         <Grid item xs={12} md={12}>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            gutterBottom
+          >
             All Courses
           </Typography>
           <Divider />
         </Grid>
-        <Grid item xs={12} md={12}>
+        <Grid 
+          item 
+          xs={12} 
+          md={12}
+        >
           <Grid container>
             { courses && 
             courses.map(course => (
@@ -70,8 +85,15 @@ export default function CoursesHome({ user }) {
   )
 }
 
-// SERVER SIDE THIS
-// THE PROGRESS OF LEARNER
+/**
+ *
+ * The code below is a server-side render.
+ * For authentication purpose only.
+ *
+ * If a user is authenticated, then continue
+ * to fetch the all the courses.
+ *
+ */
 export async function getServerSideProps({ req }) {
   if (req.cookies.token) {
     return {
