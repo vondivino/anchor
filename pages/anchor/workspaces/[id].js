@@ -53,7 +53,7 @@ export default function WorkspacesID({ id }) {
         { workspace.projectDescription }
       </Typography>
       <Divider />
-      <Editor workspaceID={id}/>
+      <Editor id={id} collection="workspaces"/>
     </Layout>
   )
 }

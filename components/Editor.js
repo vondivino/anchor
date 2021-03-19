@@ -9,18 +9,14 @@ import 'ace-builds/src-noconflict/mode-html'
 import 'ace-builds/src-noconflict/ext-language_tools'
 import 'ace-builds/src-noconflict/theme-monokai'
 
-export default function Editor({ workspaceID }) {
+export default function Editor({ id, collection }) {
 
   const [code, setCode] = useState('')
+  const [enrolled, setEnrolled] = useState({})
   const firestore = firebase.firestore()
-  const workspacesRef = firestore.collection('workspaces')
-  const workspaceRef = workspacesRef.doc(workspaceID)
-  const styles = { 
-    editor: { 
-      display: 'flex',
-      marginTop: '25px' 
-    }
-  }
+  const workspacesRef = firestore.collection(collection)
+  const workspaceRef = workspacesRef.doc(id)
+
 
   /** 
    * 
@@ -34,7 +30,13 @@ export default function Editor({ workspaceID }) {
    * 
    */
   function handleLiveSave(code_) {
-    workspaceRef.update({ code: code_ })
+    if (collection !== 'enrolled') {
+      workspaceRef.update({ code: code_ })
+    } else {
+      const course = {...enrolled, code: code_ }
+      const updatedEnrolled = { course: course }
+      workspaceRef.update(updatedEnrolled)
+    }
     setCode(code_)
   }
 
@@ -47,7 +49,12 @@ export default function Editor({ workspaceID }) {
 
   useEffect(async () => {
     const workspace = await workspaceRef.get()
-    setCode(workspace.data().code)
+    if (collection !== 'enrolled') {
+      setCode(workspace.data().code)
+    } else {
+      setEnrolled(workspace.data().course)
+      setCode(workspace.data().course.code)
+    }
     return () => setCode(null)
   }, [])
 
@@ -55,7 +62,7 @@ export default function Editor({ workspaceID }) {
     <div style={styles.editor}>
       <AceEditor
         value={code}
-        name={workspaceID}
+        name={id}
         onChange={handleLiveSave}
         mode={config.mode}
         theme={config.theme}
@@ -69,3 +76,10 @@ export default function Editor({ workspaceID }) {
     </div>
   )
 } 
+
+const styles = {
+  editor: {
+    display: 'flex',
+    marginTop: '25px'
+  }
+}
