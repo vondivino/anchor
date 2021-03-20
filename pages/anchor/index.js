@@ -7,3 +7,8 @@ export default function AnchorHome() {
     </Layout>
   )
 }
+
+
+// TODO:
+// 1. Check if the user is authenticated 
+// 2. Display what anchor is all about

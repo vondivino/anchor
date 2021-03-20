@@ -18,21 +18,12 @@ export default function Editor({ id, collection }) {
   const collectionRef = firestore.collection(collection)
   const docRef = collectionRef.doc(id)
 
-  /** 
-   * 
-   * This code architecture below will allow to 
-   * save the local code to Firebase synchronously. 
-   * Note that the local code refers to the 'code' state.
-   * 
-   * When there is a change in the code editor,
-   * it will change both the code state and the 
-   * Firebase in real-time.
-   * 
-   */
   function handleLiveSave(code_) {
     if (collection !== 'enrolled') {
+      // e.g. Workspaces
       docRef.update({ code: code_ })
     } else {
+      // Enrolled
       const course = {...enrolled, code: code_ }
       const updatedEnrolled = { course: course }
       docRef.update(updatedEnrolled)
@@ -40,17 +31,13 @@ export default function Editor({ id, collection }) {
     setCode(code_)
   }
 
-  /** 
-   * 
-   * In this useEffect, it only happens once. This 
-   * will be the initial code value in the code editor.
-   * 
-   */
   useEffect(async () => {
     const doc = await docRef.get()
     if (collection !== 'enrolled') {
+      // e.g. Workspaces
       setCode(doc.data().code)
     } else {
+      // Enrolled
       setEnrolled(doc.data().course)
       setCode(doc.data().course.code)
     }
@@ -58,7 +45,10 @@ export default function Editor({ id, collection }) {
   }, [])
 
   return (
-    <div style={styles.editor}>
+    <div style={{
+      display: 'flex',
+      marginTop: '25px'
+    }}>
       <AceEditor
         value={code}
         name={id}
@@ -75,10 +65,3 @@ export default function Editor({ id, collection }) {
     </div>
   )
 } 
-
-const styles = {
-  editor: {
-    display: 'flex',
-    marginTop: '25px'
-  }
-}

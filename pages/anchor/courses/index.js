@@ -1,4 +1,4 @@
-import { 
+import {
   Typography,
   Divider,
   Grid,
@@ -8,30 +8,20 @@ import firebase from '../../../lib/firebase'
 import Layout from '../../../components/Layout'
 import Course from '../../../components/Course'
 
-
 export default function CoursesHome({ user }) {
 
   const [courses, setCourses] = useState([])
+  const firestore = firebase.firestore()
+  const coursesRef = firestore.collection('courses')
 
-  /** 
-   * 
-   * This code architecture below will fetch the course
-   * and its steps. It will structure it so that it will 
-   * be synchronous to other codebase.
-   * 
-   */
   useEffect(async () => {
-    let courses_ = []
     let course_ = {}
+    let courses_ = []
     let steps_ = []
-    const fetchCourses = await firebase
-      .firestore()
-      .collection('courses').get()
+    const fetchCourses = coursesRef.get()
 
     fetchCourses.forEach(async course => {
-      const steps = await firebase
-        .firestore()
-        .collection('courses')
+      const steps = coursesRef
         .doc(course.id)
         .collection('steps').get()
 
@@ -48,63 +38,54 @@ export default function CoursesHome({ user }) {
       courses_ = [...courses_, course_]
       setCourses(courses_)
     })
-    
+
+    return () => setCourses([])
   }, [])
 
   return (
     <Layout>
       <Grid container>
-        <Grid item xs={12} md={12}>
-          <Typography 
-            variant="h4" 
-            component="h1" 
+        <Grid item md={12}>
+          <Typography
+            variant="h4"
+            component="h1"
             gutterBottom
           >
             All Courses
           </Typography>
           <Divider />
         </Grid>
-        <Grid 
-          item 
-          xs={12} 
-          md={12}
-        >
-          <Grid container>
-            { courses && 
-            courses.map(course => (
-              <Course 
-                key={course.slug} 
-                user={user}
-                course={course} 
-              />
-            ))}
-          </Grid>
+        <Grid item md={12}>
+          <CoursesGrid courses={courses} />
         </Grid>
       </Grid>
     </Layout>
   )
 }
 
-/**
- *
- * The code below is a server-side render.
- * For authentication purpose only.
- *
- * If a user is authenticated, then continue
- * to fetch the all the courses.
- *
- */
+function CoursesGrid({ courses }) {
+  return (
+    <Grid container>
+      {courses &&
+      courses.map(course => (
+        <Course
+          key={course.slug}
+          user={user}
+          course={course}
+        />
+      ))}
+    </Grid>
+  )
+}
+
 export async function getServerSideProps({ req }) {
   if (req.cookies.token) {
     return {
-      props: { user: req.cookies.token || null}
+      props: { user: req.cookies.token || null }
     }
   } else {
     return {
-      redirect: {
-        permanent: false,
-        destination: '/auth/login/'
-      }
+      redirect: { permanent: false, destination: '/auth/login/' }
     }
   }
 }

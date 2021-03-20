@@ -15,20 +15,11 @@ export default function Course({ course, user }) {
   const router = useRouter()
   const { name, description, slug } = course
   const [isEnrolled, setIsEnrolled] = useState(false)
+  const firestore = firebase.firestore()
+  const enrolledRef = firestore.collection('enrolled')
 
   useEffect(async () => {
-    /**
-     * 
-     * Check if the user is already enrolled
-     * in a course. If so, we do not want to 
-     * re-enroll the user again. Instead, 
-     * we will just continue his/her course 
-     * session.
-     * 
-     */
-    const courses = await firebase
-    .firestore()
-    .collection('enrolled')
+    const courses = enrolledRef
     .where('user', '==', user)
     .get()
 
@@ -37,32 +28,15 @@ export default function Course({ course, user }) {
         setIsEnrolled(true)
       }
     })
+
+    return () => setIsEnrolled(false)
   }, [])
 
   async function handleEnroll() {
-
-    const details = {
-      user: user,
-      course: course
-    }
-
-    /** 
-     * 
-     * Enroll only the user if the user is
-     * not currently enrolled in a course.
-     * 
-     * Immediately push the user to the first
-     * page of the course.
-     * 
-     */
+    const details = { user: user, course: course }
     if (!isEnrolled) {
-      firebase
-      .firestore()
-      .collection('enrolled')
-      .doc()
-      .set(details)
+      enrolledRef.doc().set(details)
     }
-
     router.push(`/anchor/courses/${slug}/0`)
   }
 
