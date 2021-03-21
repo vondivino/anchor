@@ -4,15 +4,18 @@ import {
   Grid,
   Button
 } from '@material-ui/core'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import firebase from '../../../lib/firebase'
 import Layout from '../../../components/Layout'
+import Loader from '../../../components/Loader'
 import Workspace from '../../../components/Workspace'
 
 export default function WorkspacesHome({ user }) {
 
   const [workspaces, setWorkspaces] = useState([])
+  const [loading, setLoading] = useState(true)
   const firestore = firebase.firestore()
   const workspacesRef = firestore.collection('workspaces')
 
@@ -20,25 +23,35 @@ export default function WorkspacesHome({ user }) {
     if (user) {
       const userWorkspaces = workspacesRef.where('userID', '==', user)
       const fetchWorkspaces = await userWorkspaces.get()
-      fetchWorkspaces.forEach(workspace => {
-        const workspaceTemp = {...workspace.data(), id: workspace.id}
-        const workspaces_ = workspaces
-        workspaces_.push(workspaceTemp)
-        setWorkspaces([...workspaces_])
-      })
+      if (fetchWorkspaces.size > 0) {
+        fetchWorkspaces.forEach(workspace => {
+          const workspaceTemp = {...workspace.data(), id: workspace.id}
+          const workspaces_ = workspaces
+          workspaces_.push(workspaceTemp)
+          setWorkspaces([...workspaces_])
+          setLoading(false)
+        })
+      } else {
+        setLoading(false)
+      }
     }
     return () => setWorkspaces([])
   }, [])
 
-  return (
-    <Layout>
-      <Grid container>
-      <Header />
-      <Divider />
-      <WorkspacesGrid workspaces={workspaces} />
-      </Grid>
-    </Layout>
-  )
+  if (!loading) {
+    return (
+      <Layout>
+        <Head>
+          <title>Anchor | Your Workspaces</title>
+        </Head>
+        <Grid container>
+        <Header />
+        <Divider />
+        <WorkspacesGrid workspaces={workspaces} />
+        </Grid>
+      </Layout>
+    )
+  } else { return <Loader /> }
 }
 
 
@@ -77,7 +90,7 @@ function Header() {
 
 function WorkspacesGrid({ workspaces }) {
   return (
-    <Grid item md={12} spacing={2}>
+    <Grid item md={12}>
       <Grid container>
         {workspaces && 
         workspaces.map(workspace => (

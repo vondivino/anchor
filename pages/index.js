@@ -1,13 +1,15 @@
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 
-export default function Home({ user }) {
+export default function Home() {
+  return <></>
+}
 
-  return (
-    <div>
-      <Head>
-        <title>Buoy Tech</title>
-      </Head>
-      <h1>The index page</h1>
-    </div>
-  )
+
+export async function getServerSideProps({ req }) {
+  if (req.cookies.token) {
+    return { redirect: { permanent: false, destination: '/anchor/'}}
+  } else {
+    return { redirect: { permanent: false, destination: '/auth/login/'}}
+  }
 }

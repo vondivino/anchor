@@ -3,14 +3,17 @@ import {
   Divider,
   Grid,
 } from '@material-ui/core'
+import Head from 'next/head'
 import { useState, useEffect } from 'react'
 import firebase from '../../../lib/firebase'
 import Layout from '../../../components/Layout'
+import Loader from '../../../components/Loader'
 import Course from '../../../components/Course'
 
 export default function CoursesHome({ user }) {
 
   const [courses, setCourses] = useState([])
+  const [loading, setLoading] = useState(true)
   const firestore = firebase.firestore()
   const coursesRef = firestore.collection('courses')
 
@@ -18,10 +21,10 @@ export default function CoursesHome({ user }) {
     let course_ = {}
     let courses_ = []
     let steps_ = []
-    const fetchCourses = coursesRef.get()
+    const fetchCourses = await coursesRef.get()
 
     fetchCourses.forEach(async course => {
-      const steps = coursesRef
+      const steps = await coursesRef
         .doc(course.id)
         .collection('steps').get()
 
@@ -37,33 +40,39 @@ export default function CoursesHome({ user }) {
       course_.steps = steps_
       courses_ = [...courses_, course_]
       setCourses(courses_)
+      setLoading(false)
     })
 
     return () => setCourses([])
   }, [])
 
-  return (
-    <Layout>
-      <Grid container>
-        <Grid item md={12}>
-          <Typography
-            variant="h4"
-            component="h1"
-            gutterBottom
-          >
-            All Courses
-          </Typography>
-          <Divider />
+  if (!loading) {
+    return (
+      <Layout>
+        <Head>
+          <title>Anchor | All Courses</title>
+        </Head>
+        <Grid container>
+          <Grid item md={12}>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+            >
+              All Courses
+            </Typography>
+            <Divider />
+          </Grid>
+          <Grid item md={12}>
+            <CoursesGrid user={user} courses={courses} />
+          </Grid>
         </Grid>
-        <Grid item md={12}>
-          <CoursesGrid courses={courses} />
-        </Grid>
-      </Grid>
-    </Layout>
-  )
+      </Layout>
+    )
+  } else { return <Loader /> }
 }
 
-function CoursesGrid({ courses }) {
+function CoursesGrid({ courses, user }) {
   return (
     <Grid container>
       {courses &&

@@ -1,7 +1,9 @@
+import Head from 'next/head'
 import { useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useRouter } from 'next/router'
 import firebase from '../../../lib/firebase'
+import { defaultNewWorkspaceValue } from '../../../components/editor.config'
 import Layout from '../../../components/Layout'
 
 
@@ -10,7 +12,7 @@ export default function WorkspacesNew({ user }) {
   // TODO: Add a datetime field here
   // Not important :)
   const workspace = { 
-    code: '', 
+    code: defaultNewWorkspaceValue, 
     userID: user 
   }
   const router = useRouter()
@@ -45,6 +47,9 @@ export default function WorkspacesNew({ user }) {
   // TODO: Improve UI
   return (
     <Layout>
+      <Head>
+        <title>Anchor | New Workspace</title>
+      </Head>
       <form onSubmit={handleSubmit} >
         <input type="text" ref={projectNameInput} />
           <textarea ref={projectDescInput} />

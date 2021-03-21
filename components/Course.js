@@ -19,7 +19,7 @@ export default function Course({ course, user }) {
   const enrolledRef = firestore.collection('enrolled')
 
   useEffect(async () => {
-    const courses = enrolledRef
+    const courses = await enrolledRef
     .where('user', '==', user)
     .get()
 

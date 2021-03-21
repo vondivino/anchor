@@ -2,24 +2,22 @@ import {
   Grid, 
   Divider,
   Typography,
-  Button
+  Button,
 } from '@material-ui/core'
+import Head from 'next/head'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import firebase from '../../../../lib/firebase'
 import Layout from '../../../../components/Layout'
 import { makeStyles } from '@material-ui/core/styles'
-
-const Editor = dynamic(
-  import('../../../../components/Editor'),
-  { ssr: false }
-)
+import Loader from '../../../../components/Loader'
 
 export default function CoursePage({ user, slug, order }) {
 
   const styles = useStyles()
   const router = useRouter()
+  const [loading, setLoading] = useState(true)
   const [course, setCourse] = useState({})
   const [currentStep, setCurrentStep ] = useState({}) 
   const firestore = firebase.firestore() 
@@ -28,7 +26,7 @@ export default function CoursePage({ user, slug, order }) {
   useEffect(async () => {
     let course_ = {}
     let steps_ = []
-    const courses = enrolledRef
+    const courses = await enrolledRef
       .where('user', '==', user)
       .where('course.slug', '==', slug).get()
 
@@ -47,6 +45,7 @@ export default function CoursePage({ user, slug, order }) {
       const currentStep_ = steps_.filter(step => step.order == order)
       if (currentStep_.length !== 0) {
         setCurrentStep(currentStep_[0])
+        setLoading(false)
       } else {
         router.push('/anchor/courses/')
       }
@@ -63,50 +62,60 @@ export default function CoursePage({ user, slug, order }) {
     return router.push(`/anchor/courses/${slug}/${step}`)
   }
 
-  return (
-    <Layout>
-      <Grid container>
-        <Grid item md={6}>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            gutterBottom
-          >
-            { currentStep.name }
-          </Typography>
-          <Typography 
-            variant="subtitle1" 
-            component="p" 
-            gutterBottom
-          >
-            { currentStep.description }
-          </Typography>
-          <Divider />
+  if (!loading) {
+    return (
+      <Layout>
+        <Head>
+          <title>Anchor | {currentStep.name}</title>
+        </Head>
+        <Grid container>
+          <Grid item md={6}>
+            <Typography 
+              variant="h4" 
+              component="h1" 
+              gutterBottom
+            >
+              { currentStep.name }
+            </Typography>
+            <Typography 
+              variant="subtitle1" 
+              component="p" 
+              gutterBottom
+            >
+              { currentStep.description }
+            </Typography>
+            <Divider />
+          </Grid>
+          <Grid item md={6}>
+            <Button 
+              variant="contained" 
+              color="primary"
+              className={styles.courseNxtBtn}
+              onClick={() => handleProceed(1)}
+            >
+              Mark as Completed
+            </Button>
+            <Button 
+              variant="outlined" 
+              color="primary"
+              className={styles.courseNxtBtn}
+              onClick={() => handleProceed(-1)}
+            >
+              Previous Step
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item md={6}>
-          <Button 
-            variant="contained" 
-            color="primary"
-            className={styles.courseNxtBtn}
-            onClick={() => handleProceed(1)}
-          >
-            Mark as Completed
-          </Button>
-          <Button 
-            variant="outlined" 
-            color="primary"
-            className={styles.courseNxtBtn}
-            onClick={() => handleProceed(-1)}
-          >
-            Previous Step
-          </Button>
-        </Grid>
-      </Grid>
-      { course.id && 
-      <Editor id={course.id} collection="enrolled" />}
-    </Layout>
-  )
+        { course.id && 
+        <Editor id={course.id} collection="enrolled" />}
+      </Layout>
+    )
+  } else { return <Loader /> }
 }
+
+const Editor = dynamic(
+  import('../../../../components/Editor'),
+  { ssr: false }
+)
 
 const useStyles = makeStyles(theme => {
   return {
