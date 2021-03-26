@@ -8,6 +8,8 @@ Since we have two prototypes, each has its own pros and cons.
 2. [Figma Hi-Fo Prototype](https://www.figma.com/proto/SaPwyyBmNl4w5o3oP1iAW5/Pitch-Deck?node-id=171%3A207&scaling=min-zoom&page-id=110%3A0)
 3. [Anchor AVP](https://youtu.be/htHoZzHeJGE)
 
+Please follow me here! Let's innovate!
+
 ## If you are using the Coded Prototype 
 
 Please follow the link above to get started!
