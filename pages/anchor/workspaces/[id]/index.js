@@ -1,13 +1,13 @@
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
-import firebase from '../../../lib/firebase'
-import Layout from '../../../components/Layout'
-import Loader from '../../../components/Loader'
+import firebase from '../../../../lib/firebase'
+import Layout from '../../../../components/Layout'
+import Loader from '../../../../components/Loader'
 import { Typography, Divider } from '@material-ui/core'
 
 const Editor = dynamic(
-  import('../../../components/Editor'),
+  import('../../../../components/Editor'),
   { ssr: false }
 )
 

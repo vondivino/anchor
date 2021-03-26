@@ -1,11 +1,18 @@
-export default function Preview({ code }) {
+export default function Preview({ code, styles_ }) {
 
-  const styles = { 
-    preview: { 
-      flex: '1', 
-      border: 'none' 
+  let styles
+
+  if (!styles_) {
+    styles = {
+      preview: {
+        flex: '1',
+        border: 'none'
+      }
     }
+  } else {
+    styles = styles_
   }
+
 
   return (
     <iframe 

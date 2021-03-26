@@ -19,12 +19,17 @@ export default function LoginPage() {
 	const [pwd, setPwd ] = useState('')
 	const auth = firebase.auth()
 
-	function handleSubmit(e) {
+	async function handleSubmit(e) {
 		e.preventDefault()
 
-		auth.signInWithEmailAndPassword(email, pwd)
-		.finally(() => router.push('/anchor/'))
-		.catch(() => e.target.reset())
+		try {
+			await auth.signInWithEmailAndPassword(email, pwd)
+			router.push('/anchor/')
+		} catch {
+			console.log('Error logging in.')
+		}
+		setEmail('')
+		setPwd('')
 	}
 
 	return (
